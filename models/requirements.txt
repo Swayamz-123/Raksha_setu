@@ -1,0 +1,11 @@
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+python-multipart>=0.0.9
+flask
+flask-cors
+opencv-python
+ultralytics
+python-dotenv
+google-genai
+numpy
+requests

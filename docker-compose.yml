@@ -1,0 +1,85 @@
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: raksha-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - raksha-network
+
+  redis:
+    image: redis:alpine
+    container_name: raksha-redis-cluster
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - raksha-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: raksha-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGODB_URI=mongodb://mongo:27017/raksha-setu
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ACCESS_TOKEN_SECRET=rakshasetu-super-secret-access-token-2026
+      - ACCESS_TOKEN_EXPIRY=1d
+      - REFRESH_TOKEN_SECRET=rakshasetu-super-secret-refresh-token-2026
+      - REFRESH_TOKEN_EXPIRY=10d
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - raksha-network
+
+  models:
+    build:
+      context: ./models
+      dockerfile: Dockerfile
+    container_name: raksha-ai-service
+    restart: unless-stopped
+    ports:
+      - "5003:5003"
+    environment:
+      - PORT=5003
+      - BACKEND_API_URL=http://backend:5000
+    depends_on:
+      - backend
+    networks:
+      - raksha-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: raksha-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - raksha-network
+
+volumes:
+  mongo-data:
+  redis-data:
+
+networks:
+  raksha-network:
+    driver: bridge

@@ -1,0 +1,83 @@
+name: RakshaSetu CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-test-suite:
+    name: Backend Distributed Tests & Concurrency
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Backend Dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Execute Vitest Integration & Unit Tests
+        working-directory: ./backend
+        env:
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          MONGODB_URI: mongodb://127.0.0.1:27017/raksha-test
+          ACCESS_TOKEN_SECRET: test-access-secret-token-ci
+          REFRESH_TOKEN_SECRET: test-refresh-secret-token-ci
+        run: npm test
+
+      - name: Verify Concurrency & Distributed Lock Assertions
+        working-directory: ./backend
+        env:
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+        run: npm run test:concurrency
+
+      - name: Execute Redis Geospatial Benchmark
+        working-directory: ./backend
+        env:
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+        run: npm run benchmark:geo
+
+  docker-build-verification:
+    name: Docker Container & Compose Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose config
+
+      - name: Build Backend Docker Image
+        run: docker build -t rakshasetu-backend:latest ./backend
+
+      - name: Build AI Microservice Docker Image
+        run: docker build -t rakshasetu-ai-service:latest ./models

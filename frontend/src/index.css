@@ -1,0 +1,254 @@
+@import 'tailwindcss';
+
+/* ── Design Tokens ── */
+@theme {
+  --color-emergency: #dc2626;
+  --color-emergency-dark: #991b1b;
+  --color-safe: #16a34a;
+  --color-warning: #d97706;
+  --color-info: #2563eb;
+}
+
+/* ── Base ── */
+body {
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+  background: #f8fafc;
+  color: #0f172a;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-y: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Chakra Petch', 'Outfit', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* ── Component Classes ── */
+@layer components {
+
+  /* Buttons */
+  .btn-emergency {
+    @apply bg-red-600 text-white px-6 py-3 rounded-2xl font-semibold
+           shadow-lg shadow-red-600/25 hover:bg-red-700 hover:shadow-red-600/40
+           active:scale-95 transition-all duration-150
+           flex items-center justify-center gap-2 cursor-pointer;
+  }
+
+  .btn-primary {
+    @apply bg-red-600 text-white px-6 py-3 rounded-xl font-medium
+           shadow-lg shadow-red-600/20 hover:bg-red-700
+           active:scale-95 transition-all duration-200
+           flex items-center justify-center gap-2 cursor-pointer;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-2xl
+           font-semibold shadow-sm hover:bg-slate-50 hover:border-slate-300
+           active:scale-95 transition-all duration-150
+           flex items-center justify-center gap-2 cursor-pointer;
+  }
+
+  .btn-ghost {
+    @apply text-slate-600 px-4 py-2 rounded-xl font-medium
+           hover:bg-slate-100 active:scale-95 transition-all duration-150
+           flex items-center justify-center gap-2 cursor-pointer;
+  }
+
+  /* Cards */
+  .card {
+    background: white;
+    border-radius: 1.5rem;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .card-elevated {
+    background: white;
+    border-radius: 1.5rem;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 24px -4px rgba(0,0,0,0.08);
+  }
+
+  .card-glass {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255,255,255,0.6);
+    box-shadow: 0 8px 32px -8px rgba(0,0,0,0.12);
+  }
+
+  /* Legacy aliases — plain CSS, no @apply of custom classes */
+  .card-premium {
+    background: white;
+    border-radius: 1.5rem;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 24px -4px rgba(0,0,0,0.08);
+  }
+
+  /* Inputs */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-2xl border border-slate-200
+           bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-red-500/20
+           focus:border-red-400 transition-all outline-none
+           text-slate-800 placeholder-slate-400 text-sm;
+  }
+
+  /* Status badges */
+  .badge-emergency {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold
+           bg-red-100 text-red-700 uppercase tracking-wide;
+  }
+
+  .badge-safe {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold
+           bg-green-100 text-green-700 uppercase tracking-wide;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold
+           bg-amber-100 text-amber-700 uppercase tracking-wide;
+  }
+
+  /* Stat card — plain CSS */
+  .stat-card {
+    background: white;
+    border-radius: 1.5rem;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 24px -4px rgba(0,0,0,0.08);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Nav */
+  .nav-link {
+    @apply p-2.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100
+           transition-all duration-150 cursor-pointer;
+  }
+
+  .nav-link-active {
+    @apply p-2.5 rounded-xl text-red-600 bg-red-50 transition-all duration-150;
+  }
+}
+
+/* ── SOS Pulse Animation ── */
+.sos-pulse-wrapper { background: transparent; border: none; }
+
+.sos-pulse-dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #dc2626; border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(220,38,38,0.4);
+  position: relative;
+}
+
+.sos-pulse-dot::after {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%; height: 100%; border-radius: 50%;
+  background: #dc2626;
+  animation: radar-ping 1.8s cubic-bezier(0,0,0.2,1) infinite;
+  z-index: -1;
+}
+
+@keyframes radar-ping {
+  0% { transform: translate(-50%,-50%) scale(1); opacity: 0.6; }
+  100% { transform: translate(-50%,-50%) scale(3); opacity: 0; }
+}
+
+/* ── User Location Dot ── */
+.user-map-wrapper { background: transparent; border: none; }
+
+.user-map-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #2563eb; border: 2.5px solid white;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.2);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── Leaflet overrides ── */
+.leaflet-container {
+  -webkit-tap-highlight-color: transparent;
+  isolation: isolate; z-index: 0;
+  font-family: 'Outfit', sans-serif;
+}
+.leaflet-top, .leaflet-bottom { z-index: 800 !important; }
+.leaflet-pane { z-index: 400 !important; }
+.leaflet-tile-pane { z-index: 200 !important; }
+.leaflet-marker-pane { z-index: 600 !important; }
+.leaflet-popup-pane { z-index: 700 !important; }
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+.leaflet-popup-tip { background: white !important; }
+
+/* ── Map gesture overlay ── */
+.map-gesture-overlay {
+  position: absolute; inset: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(15,23,42,0.4); pointer-events: none;
+  backdrop-filter: blur(2px);
+  border-radius: inherit;
+}
+.map-gesture-text {
+  color: #fff; font-size: 13px; font-weight: 600;
+  background: rgba(15,23,42,0.7); padding: 8px 20px;
+  border-radius: 99px; letter-spacing: 0.01em;
+}
+
+/* ── Emergency SOS button glow ── */
+@keyframes sos-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4), 0 20px 40px -10px rgba(220,38,38,0.3); }
+  50% { box-shadow: 0 0 0 20px rgba(220,38,38,0), 0 20px 40px -10px rgba(220,38,38,0.5); }
+}
+
+.sos-btn-glow {
+  animation: sos-glow 2s ease-in-out infinite;
+}
+
+/* ── Gradient text ── */
+.text-gradient-emergency {
+  background: linear-gradient(135deg, #dc2626, #f97316);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Glass morphism panel ── */
+.glass-panel {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+/* ── Route line on map ── */
+.route-line {
+  stroke: #2563eb;
+  stroke-width: 4;
+  stroke-dasharray: 8 4;
+  animation: dash-move 1s linear infinite;
+}
+
+@keyframes dash-move {
+  to { stroke-dashoffset: -12; }
+}
+
+/* ── Ambulance marker ── */
+.ambulance-marker {
+  background: #16a34a;
+  border: 3px solid white;
+  border-radius: 50%;
+  width: 20px; height: 20px;
+  box-shadow: 0 2px 8px rgba(22,163,74,0.4);
+}
