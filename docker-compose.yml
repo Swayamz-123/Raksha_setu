@@ -40,7 +40,9 @@ services:
       - ACCESS_TOKEN_EXPIRY=1d
       - REFRESH_TOKEN_SECRET=rakshasetu-super-secret-refresh-token-2026
       - REFRESH_TOKEN_EXPIRY=10d
-      - FRONTEND_URL=http://localhost:3000
+      - FRONTEND_URL=https://rakshasetu66.me
+      - SOS_TEST_EMAIL=itzswayam890@gmail.com
+      - EMAIL_APP_PASSWORD=msaqhbrjvbnwakdd
     depends_on:
       - mongo
       - redis
