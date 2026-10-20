@@ -81,6 +81,7 @@ function Dashboard() {
   const [incomingAlert, setIncomingAlert] = useState(null);
   const [location, setLocation] = useState(null);
   const [pendingSOS, setPendingSOS] = useState([]);
+  const [myActiveSOS, setMyActiveSOS] = useState(null);
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [profileSaving, setProfileSaving] = useState(false);
   const [popup, setPopup] = useState(null);
@@ -189,7 +190,13 @@ function Dashboard() {
 
   const fetchPendingSOS = async () => {
     if (!location) return;
-    try { const res = await sosAPI.getPending(); setPendingSOS((res.data.data.pendingSOS || []).filter(s => s.broadcaster?._id !== user?._id)); } catch {}
+    try {
+      const res = await sosAPI.getPending();
+      const all = res.data.data.pendingSOS || [];
+      const myActive = all.find(s => s.broadcaster?._id === user?._id);
+      setMyActiveSOS(myActive || null);
+      setPendingSOS(all.filter(s => s.broadcaster?._id !== user?._id));
+    } catch {}
   };
 
   const nearestSOS = useMemo(() => {
@@ -320,6 +327,30 @@ function Dashboard() {
       <AppNavbar />
 
       <main className="max-w-7xl mx-auto px-3 md:px-4 pt-20 pb-12">
+        {/* Active Emergency Banner for Creator */}
+        {myActiveSOS && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="card-elevated border-2 border-red-500 bg-red-50/95 p-5 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl shadow-red-500/10">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-red-600/30">
+                <Bell className="w-6 h-6 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <p className="font-extrabold text-red-900 text-sm sm:text-base">ACTIVE EMERGENCY IN PROGRESS</p>
+                  <span className="text-[10px] uppercase bg-red-200 text-red-800 px-2.5 py-0.5 rounded-full font-bold">{myActiveSOS.crisisType}</span>
+                </div>
+                <p className="text-xs text-red-700 mt-1">Your emergency broadcast is live. Nearby responders and units have been alerted.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => navigate(`/sos/${myActiveSOS._id}`)}
+              className="btn-emergency bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm shrink-0 flex items-center justify-center gap-2 shadow-lg shadow-red-600/30 transition-all hover:scale-[1.02]"
+            >
+              Return to Live SOS <ChevronRight size={16} />
+            </button>
+          </motion.div>
+        )}
+
         {/* SOS Hero */}
         <section className="py-10 flex flex-col items-center">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center mb-8">
@@ -327,12 +358,23 @@ function Dashboard() {
             <p className="text-slate-500 max-w-md mx-auto">One tap to alert nearby responders, hospitals, and emergency services instantly.</p>
           </motion.div>
 
-          <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={() => setShowCrisisSelector(true)} className="relative outline-none group">
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={() => {
+              if (myActiveSOS) {
+                navigate(`/sos/${myActiveSOS._id}`);
+              } else {
+                setShowCrisisSelector(true);
+              }
+            }}
+            className="relative outline-none group"
+          >
             <div className="absolute inset-0 rounded-full bg-red-600 blur-2xl opacity-25 group-hover:opacity-40 transition-opacity" />
-            <div className="relative w-44 h-44 md:w-52 md:h-52 rounded-full bg-linear-to-br from-red-500 to-red-700 flex flex-col items-center justify-center shadow-2xl shadow-red-600/40 sos-btn-glow border-4 border-red-400/20 group-hover:border-red-400/40 transition-all">
+            <div className={`relative w-44 h-44 md:w-52 md:h-52 rounded-full ${myActiveSOS ? 'bg-linear-to-br from-amber-500 to-red-600' : 'bg-linear-to-br from-red-500 to-red-700'} flex flex-col items-center justify-center shadow-2xl shadow-red-600/40 sos-btn-glow border-4 border-red-400/20 group-hover:border-red-400/40 transition-all`}>
               <Bell className="w-14 h-14 text-white mb-1.5 drop-shadow" />
-              <span className="text-2xl font-bold text-white tracking-widest">SOS</span>
-              <span className="text-red-200 text-xs mt-1 font-medium">Tap to Alert</span>
+              <span className="text-2xl font-bold text-white tracking-widest">{myActiveSOS ? 'VIEW' : 'SOS'}</span>
+              <span className="text-red-200 text-xs mt-1 font-medium">{myActiveSOS ? 'Active Incident' : 'Tap to Alert'}</span>
             </div>
           </motion.button>
 

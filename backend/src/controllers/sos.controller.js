@@ -18,9 +18,9 @@ export const createSOS = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Crisis type and location are required');
   }
   
-  // Rate limiting: Check if user already has an active SOS
-  const activeSOS = await SOS.findOne({ broadcaster: req.user._id, status: SOS_STATUS.ACTIVE });
-  if (activeSOS) throw new ApiError(400, "You already have an active SOS alert. Please resolve it first.");
+  // Rate limiting: Check if user already has an active or responding SOS
+  const activeSOS = await SOS.findOne({ broadcaster: req.user._id, status: { $in: [SOS_STATUS.ACTIVE, SOS_STATUS.RESPONDING] } });
+  if (activeSOS) throw new ApiError(400, "You already have an active SOS alert in progress. Please resolve it first.");
 
   // Check for suspended users
   if (req.user.isSuspended) throw new ApiError(403, "Your account is suspended. You cannot broadcast SOS alerts.");

@@ -73,34 +73,22 @@ export const startSOSWorker = () => {
           distance: responder?.distance || null
         });
 
-        // A. Notify Guardians first
+        // Immediately broadcast to all online responders
+        io.emit('sos_alert', sosAlertPayload());
+
+        // Notify Guardians with high priority
         if (guardianIds.length > 0) {
           guardianIds.forEach((gId) => {
             if (gId === broadcasterId.toString()) return;
             const payload = { ...sosAlertPayload(), isGuardianAlert: true, wardName: broadcaster?.name };
             io.to(gId).emit('guardian_sos_alert', payload);
-            io.to(gId).emit('sos_alert', payload);
           });
 
           await SOS.findByIdAndUpdate(sosId, { guardianNotified: true });
 
-          // Community alert fanout with staggered delay
-          setTimeout(() => {
-            responders.forEach((r) => {
-              if (r.userId.toString() === broadcasterId.toString() || guardianIds.includes(r.userId.toString())) return;
-              io.to(r.userId.toString()).emit('sos_alert', sosAlertPayload(r));
-            });
-          }, 15000);
-
           io.to(broadcasterId.toString()).emit('guardians_notified', {
             count: guardianIds.length,
-            message: `${guardianIds.length} guardian(s) notified first. Community alerted in 15s.`
-          });
-        } else {
-          // No guardians: Alert all nearby responders immediately
-          responders.forEach((r) => {
-            if (r.userId.toString() === broadcasterId.toString()) return;
-            io.to(r.userId.toString()).emit('sos_alert', sosAlertPayload(r));
+            message: `${guardianIds.length} guardian(s) alerted directly.`
           });
         }
 

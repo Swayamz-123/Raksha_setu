@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Heartbeat as HeartPulse, FireSimple as Flame, WarningCircle as AlertTriangle, Shield as ShieldAlert, Lightning as Zap, X, CaretRight as ChevronRight, RadioButton as Radio, EyeSlash as EyeOff, WifiX as WifiOff, ChatCircleText as MessageSquare } from '@phosphor-icons/react';
 import { useState, useEffect } from 'react';
 import { isOnline, enqueueSOS, triggerSMSFallback } from '../services/offlineSOSQueue';
+import { broadcastSOS } from '../services/socket';
 
 const CRISIS_TYPES = [
   { id: 'medical', label: 'Medical Emergency', icon: HeartPulse, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100', description: 'Cardiac arrest, injury, bleeding, etc.' },
@@ -53,16 +54,20 @@ function CrisisSelector({ location, onClose, user, guardians }) {
     try {
       const response = await sosAPI.create(payload);
       const sosId = response.data.data._id || response.data.data.sos?._id;
-      if (sosId) navigate(`/sos/${sosId}`);
-      else setLoading(null);
+      if (sosId) {
+        broadcastSOS(sosId);
+        navigate(`/sos/${sosId}`);
+      } else {
+        setLoading(null);
+      }
     } catch (error) {
       const msg = error?.response?.data?.message || error?.message || 'Failed to send SOS.';
 
-      if (typeof msg === 'string' && msg.toLowerCase().includes('already have an active sos')) {
+      if (typeof msg === 'string' && msg.toLowerCase().includes('already have an active')) {
         try {
-          const activeRes = await sosAPI.getActive();
-          const activeList = activeRes?.data?.data?.activeSOS || [];
-          const myActive = activeList.find((s) => s?.broadcaster?._id && user?._id && s.broadcaster._id === user._id);
+          const pendingRes = await sosAPI.getPending();
+          const pendingList = pendingRes?.data?.data?.pendingSOS || [];
+          const myActive = pendingList.find((s) => s?.broadcaster?._id === user?._id);
           if (myActive?._id) {
             navigate(`/sos/${myActive._id}`);
             return;

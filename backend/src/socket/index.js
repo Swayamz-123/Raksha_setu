@@ -115,27 +115,18 @@ export const initializeSocket = (server) => {
         const assignedAmbulances = await assignAmbulancesToSOS(sos._id, latitude, longitude, 2);
         if (responders.length === 0 && guardianIds.length === 0 && assignedAmbulances.length === 0) { socket.emit('no_responders_found'); return; }
         const sosAlertPayload = (responder) => ({ sosId: sos._id, crisisType: sos.crisisType, location: sos.location, address: sos.address, broadcaster: sos.isAnonymous ? null : sos.broadcaster, eta: responder?.eta || null, distance: responder?.distance || null });
+
+        // Immediately alert all online community responders
+        socket.broadcast.emit('sos_alert', sosAlertPayload());
+
         if (guardianIds.length > 0) {
           guardianIds.forEach(gId => {
             if (gId === sos.broadcaster._id.toString()) return;
             io.to(gId).emit('guardian_sos_alert', { ...sosAlertPayload(), isGuardianAlert: true, wardName: broadcasterUser.name });
-            io.to(gId).emit('sos_alert', { ...sosAlertPayload(), isGuardianAlert: true, wardName: broadcasterUser.name });
           });
           sos.guardianNotified = true;
           await sos.save();
-          setTimeout(async () => {
-            responders.forEach(r => {
-              if (r.userId.toString() === sos.broadcaster._id.toString()) return;
-              if (guardianIds.includes(r.userId.toString())) return;
-              io.to(r.userId.toString()).emit('sos_alert', sosAlertPayload(r));
-            });
-          }, 15000);
-          socket.emit('guardians_notified', { count: guardianIds.length, message: `${guardianIds.length} guardian(s) notified first. Community alerted in 15s.` });
-        } else {
-          responders.forEach(r => {
-            if (r.userId.toString() === sos.broadcaster._id.toString()) return;
-            io.to(r.userId.toString()).emit('sos_alert', sosAlertPayload(r));
-          });
+          socket.emit('guardians_notified', { count: guardianIds.length, message: `${guardianIds.length} guardian(s) alerted directly.` });
         }
 
         if (assignedAmbulances.length > 0) {
