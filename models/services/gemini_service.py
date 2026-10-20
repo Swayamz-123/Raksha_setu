@@ -44,8 +44,9 @@ def analyze(images):
         contents.append(types.Part.from_bytes(data=_encode_image(img), mime_type="image/jpeg"))
 
     try:
+        model_name = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model=model_name,
             contents=contents,
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_INSTRUCTIONS,

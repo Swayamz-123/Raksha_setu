@@ -127,7 +127,7 @@ export default function SafetyMonitor() {
 
       if (data.message && data.message.includes('next analysis in')) {
         safeSetReportData({
-          modelUsed: model === 'gemini' ? 'Gemini 2.5 Flash' : 'LLaVA 7b (Ollama)',
+          modelUsed: model === 'gemini' ? 'Gemini 3.8 Flash' : 'LLaVA 7b (Ollama)',
           diagnosis: 'System is in cooldown period to prevent API overuse.',
           emergency: false,
           recommendation: data.message,
@@ -151,7 +151,7 @@ export default function SafetyMonitor() {
         const emergency = data.emergency === true || String(data.emergency).toLowerCase() === 'true';
 
         const baseReport = {
-          modelUsed: model === 'gemini' ? 'Gemini 2.5 Flash' : 'LLaVA 7b (Ollama)',
+          modelUsed: model === 'gemini' ? 'Gemini 3.8 Flash' : 'LLaVA 7b (Ollama)',
           diagnosis,
           emergency,
           recommendation: emergency

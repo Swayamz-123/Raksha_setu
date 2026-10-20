@@ -41,8 +41,14 @@ services:
       - REFRESH_TOKEN_SECRET=rakshasetu-super-secret-refresh-token-2026
       - REFRESH_TOKEN_EXPIRY=10d
       - FRONTEND_URL=https://rakshasetu66.me
-      - SOS_TEST_EMAIL=itzswayam890@gmail.com
-      - EMAIL_APP_PASSWORD=msaqhbrjvbnwakdd
+      - SOS_TEST_EMAIL=${SOS_TEST_EMAIL:-itzswayam890@gmail.com}
+      - EMAIL_APP_PASSWORD=${EMAIL_APP_PASSWORD:-msaqhbrjvbnwakdd}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-dl1qzbnsi}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-925786397361151}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-iDo9WrwcnZDb0K7WPtOYUz4MtlI}
+      - TOMTOM_API_KEY=${TOMTOM_API_KEY:-LmYQ7iYBIsMRGVMPO8pnU1mx1vjjYr17}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=gemini-3.8-flash
     depends_on:
       - mongo
       - redis
@@ -60,6 +66,8 @@ services:
     environment:
       - PORT=5003
       - BACKEND_API_URL=http://backend:5000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_MODEL=gemini-3.8-flash
     depends_on:
       - backend
     networks:

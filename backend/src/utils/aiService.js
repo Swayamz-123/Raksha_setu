@@ -18,7 +18,7 @@ const geminiBreaker = new CircuitBreaker(async (prompt) => {
     throw new Error('GEMINI_API_KEY not configured');
   }
   const response = await getAI().models.generateContent({
-    model: "gemini-flash-latest",
+    model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
     contents: prompt,
     config: { temperature: 0.4, maxOutputTokens: 1024 }
   });

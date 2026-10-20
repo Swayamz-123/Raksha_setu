@@ -111,7 +111,7 @@ async def health_check():
         "version": "2.0.0",
         "models": {
             "yolo": "yolo11n",
-            "vlm": ["gemini-2.5-flash", "llava:7b"]
+            "vlm": [os.getenv("GEMINI_MODEL", "gemini-3.8-flash"), "llava:7b"]
         }
     }
 

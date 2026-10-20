@@ -151,7 +151,7 @@ export default function Results({ result }) {
 
         <div className="report-footer">
           <p>
-            <strong>System Info:</strong> YOLO Detection + Gemini 2.5-Flash Analysis
+            <strong>System Info:</strong> YOLO Detection + Gemini 3.8 Flash Analysis
           </p>
           <p style={{ fontSize: '0.9em', color: '#666' }}>
             Generated: {new Date().toLocaleString()}
