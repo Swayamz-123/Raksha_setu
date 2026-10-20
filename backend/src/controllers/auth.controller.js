@@ -13,11 +13,13 @@ const generateTokens = async (userId) => {
   return { accessToken, refreshToken };
 };
 
-const isProduction = process.env.NODE_ENV === 'production';
-const cookieOptions = {
-  httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? 'none' : 'lax'
+const getCookieOptions = (req) => {
+  const isHttps = req.secure || req.headers['x-forwarded-proto'] === 'https';
+  return {
+    httpOnly: true,
+    secure: isHttps,
+    sameSite: isHttps ? 'none' : 'lax'
+  };
 };
 
 export const register = asyncHandler(async (req, res) => {
@@ -34,9 +36,10 @@ export const register = asyncHandler(async (req, res) => {
   const { accessToken, refreshToken } = await generateTokens(user._id);
   const createdUser = await User.findById(user._id).select("-password -refreshToken");
   
+  const opts = getCookieOptions(req);
   return res.status(201)
-    .cookie("accessToken", accessToken, cookieOptions)
-    .cookie("refreshToken", refreshToken, cookieOptions)
+    .cookie("accessToken", accessToken, opts)
+    .cookie("refreshToken", refreshToken, opts)
     .json(new ApiResponse(201, { user: createdUser, accessToken, refreshToken }, "User registered Successfully"));
 });
 
@@ -48,13 +51,15 @@ export const login = asyncHandler(async (req, res) => {
   if (user.isSuspended) throw new ApiError(403, 'Account suspended. Please contact administrator.');
   const { accessToken, refreshToken } = await generateTokens(user._id);
   const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
-  return res.status(200).cookie("accessToken", accessToken, cookieOptions).cookie("refreshToken", refreshToken, cookieOptions)
+  const opts = getCookieOptions(req);
+  return res.status(200).cookie("accessToken", accessToken, opts).cookie("refreshToken", refreshToken, opts)
     .json(new ApiResponse(200, { user: loggedInUser, accessToken, refreshToken }, "User logged In Successfully"));
 });
 
 export const logout = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } }, { new: true });
-  return res.status(200).clearCookie("accessToken", cookieOptions).clearCookie("refreshToken", cookieOptions)
+  const opts = getCookieOptions(req);
+  return res.status(200).clearCookie("accessToken", opts).clearCookie("refreshToken", opts)
     .json(new ApiResponse(200, {}, "User logged Out"));
 });
 
