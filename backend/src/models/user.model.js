@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
     emergencyNotes: { type: String, default: '' }
   },
   // Public token used for QR emergency card lookup
-  emergencyCardToken: { type: String, unique: true, sparse: true, index: true, default: null },
+  emergencyCardToken: { type: String, unique: true, sparse: true, index: true },
   emergencyCardTokenCreatedAt: { type: Date, default: null },
   refreshToken: { type: String }
 }, { timestamps: true });

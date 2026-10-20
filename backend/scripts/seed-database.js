@@ -154,6 +154,11 @@ async function seedDatabase() {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB.\n');
 
+    // Clean up any legacy non-sparse index
+    try {
+      await User.collection.dropIndex('emergencyCardToken_1');
+    } catch {}
+
     // 1. Seed or Update Admin Account
     console.log('[1/5] Seeding System Admin Account...');
     let admin = await User.findOne({ email: 'admin@rakshasetu.org' });
