@@ -7,7 +7,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { generateDebriefPrompt, FALLBACK_GUIDANCE } from '../utils/aiService.js';
 import { SOS_STATUS } from '../constant.js';
 import { emitSOSResolved } from '../socket/index.js';
-import { releaseAmbulancesForSOS } from '../services/ambulanceDispatch.service.js';
+import { releaseAmbulancesForSOS, getNearbyAvailableAmbulances } from '../services/ambulanceDispatch.service.js';
 import { enqueueSOSDispatch } from '../queues/sosQueue.js';
 import { withDistributedLock } from '../utils/distributedLock.js';
 import { assertValidSOSTransition } from '../utils/stateMachine.js';
