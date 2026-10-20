@@ -33,15 +33,10 @@ export const emitSOSEnriched = ({ sosId, aiGuidance, emergencySummary, broadcast
   if (broadcasterId) ioInstance.to(broadcasterId.toString()).emit('sos_enriched', payload);
 };
 
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173', process.env.FRONTEND_URL].filter(Boolean);
-
 export const initializeSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) callback(null, true);
-        else callback(new Error('Not allowed by CORS'));
-      },
+      origin: true,
       credentials: true
     }
   });
