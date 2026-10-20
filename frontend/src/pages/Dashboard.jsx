@@ -166,6 +166,7 @@ function Dashboard() {
     socket.on('guardian_sos_alert', alert => { setIncomingAlert({ ...alert, isGuardianAlert: true }); setPopup({ type: 'warning', message: `GUARDIAN ALERT: ${alert.wardName || 'Your ward'} triggered an SOS!` }); });
     socket.on('sos_accepted', ({ sos }) => { if (sos?._id) navigate(`/sos/${sos._id}`); });
     socket.on('sos_already_taken', () => { setPopup({ type: 'info', message: 'This SOS has already been accepted.' }); navigate('/dashboard', { replace: true }); });
+    socket.on('sos_resolved', () => { fetchPendingSOS(); });
     const cleanupAutoSync = attachAutoSync(results => {
       const synced = results.filter(r => r.success);
       if (synced.length > 0) { setPopup({ type: 'success', message: `${synced.length} offline SOS alert(s) synced.` }); if (synced[0]?.sosId) navigate(`/sos/${synced[0].sosId}`); }
@@ -179,23 +180,31 @@ function Dashboard() {
     return () => {
       clearTimeout(locationTimeout);
       navigator.geolocation.clearWatch(watchId);
-      socket.off('sos_alert'); socket.off('sos_accepted'); socket.off('sos_already_taken'); socket.off('guardian_sos_alert');
+      socket.off('sos_alert'); socket.off('sos_accepted'); socket.off('sos_already_taken'); socket.off('guardian_sos_alert'); socket.off('sos_resolved');
       if (cleanupAutoSync) cleanupAutoSync();
     };
   }, [navigate]);
 
   useEffect(() => {
-    if (location) { fetchPendingSOS(); const i = setInterval(fetchPendingSOS, 12000); return () => clearInterval(i); }
-  }, [location?.longitude, location?.latitude]);
+    fetchPendingSOS();
+    const i = setInterval(fetchPendingSOS, 5000);
+    return () => clearInterval(i);
+  }, [user?._id]);
 
   const fetchPendingSOS = async () => {
-    if (!location) return;
     try {
       const res = await sosAPI.getPending();
-      const all = res.data.data.pendingSOS || [];
-      const myActive = all.find(s => s.broadcaster?._id === user?._id);
+      const all = res.data.data?.pendingSOS || [];
+      const currentUserId = user?._id?.toString();
+      const myActive = all.find(s => {
+        const bId = s.broadcaster?._id?.toString() || s.broadcaster?.toString();
+        return bId && currentUserId && bId === currentUserId;
+      });
       setMyActiveSOS(myActive || null);
-      setPendingSOS(all.filter(s => s.broadcaster?._id !== user?._id));
+      setPendingSOS(all.filter(s => {
+        const bId = s.broadcaster?._id?.toString() || s.broadcaster?.toString();
+        return !bId || !currentUserId || bId !== currentUserId;
+      }));
     } catch {}
   };
 
