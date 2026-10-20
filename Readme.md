@@ -1,3 +1,7 @@
+# RakshaSetu (रक्षासेतु)
+
+[![RakshaSetu CI/CD](https://github.com/Swayamz-123/Raksha_setu/actions/workflows/ci.yml/badge.svg)](https://github.com/Swayamz-123/Raksha_setu/actions/workflows/ci.yml)
+
 # RakshaSetu - Distributed Autonomous Emergency Response Network
 
 [![CI/CD Pipeline](https://github.com/yourusername/RakshaSetu/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/RakshaSetu/actions/workflows/ci.yml)
